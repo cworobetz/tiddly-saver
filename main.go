@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -9,95 +8,13 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/getlantern/systray"
-	"gopkg.in/yaml.v2"
 )
 
-// Config holds the parsed config from config.yml
-type Config struct {
-	Watch struct {
-		Path string `yaml:"path"` // Absolute path to the file to watch
-	} `yaml:"watch"`
-	Destination struct {
-		Path string `yaml:"path"` // Absolute path to the file to watch
-	} `yaml:"destination"`
-	Wait int `yaml:"wait"` // Number in seconds of how long to wait after the last write to copy the file
-}
-
 func main() {
-
-	cfg := setup()
-	systray.Run(onReady, onExit)
-
+	cfg := getConfig()
 	log.Printf("Watching for file \"%s\", will move to \"%s\"", cfg.Watch.Path, cfg.Destination.Path)
-	watch(cfg)
-}
-
-func getIcon(path string) []byte {
-	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatalf("Error opening icon file: %s", err)
-	}
-	return b
-}
-
-func onReady() {
-
-	// Main systray icon
-	systray.SetIcon(getIcon("assets/pencil.ico"))
-	systray.SetTitle("Tiddly Saver")
-	systray.SetTooltip("Tiddly Saver - Download your Tiddlywiki somewhere else")
-
-	// Tooltips
-	setSystrayMenuItem("Exit", "Shutdown the app")
-}
-
-func setSystrayMenuItem(title string, tooltip string) {
-	mExit := systray.AddMenuItem(title, tooltip)
-
-	go func() {
-		<-mExit.ClickedCh
-		onExit()
-	}()
-}
-
-func onExit() {
-	log.Printf("Exit signal received, stopping program.")
-	os.Exit(0)
-}
-
-func setup() Config {
-
-	// Open config file
-	f, err := os.Open("config.yml")
-	if err != nil {
-		log.Fatalf("Error opening config.yml: %s", err)
-	}
-	defer f.Close()
-
-	// Parse yaml
-	var cfg Config
-	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&cfg)
-	if err != nil {
-		log.Fatalf("Error decoding config.yml: %s", err)
-	}
-
-	// Normalize watch path
-	abs, err := filepath.Abs(cfg.Watch.Path)
-	if err != nil {
-		log.Fatalf("Error getting watch absolute path: %s", err)
-	}
-	cfg.Watch.Path = abs
-
-	// Normalize destination path
-	abs, err = filepath.Abs(cfg.Destination.Path)
-	if err != nil {
-		log.Fatalf("Error getting destination absolute path: %s", err)
-	}
-	cfg.Destination.Path = abs
-
-	log.Printf("Setup complete. %+v", cfg)
-	return cfg
+	go watch(cfg)
+	systray.Run(onReady, onExit)
 }
 
 // watch takes the full path of a file and attempts to watch for that file

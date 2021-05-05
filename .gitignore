@@ -3,3 +3,4 @@ config.yml
 __debug_bin
 *.exe
 *.log
+tiddly-saver

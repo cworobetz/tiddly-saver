@@ -1,0 +1,19 @@
+
+FROM golang:alpine AS build-env
+
+WORKDIR $GOPATH/src/tiddly-saver
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . .
+
+RUN GO111MODULE=on GOOS=windows GOARCH=amd64 go build -ldflags "-H=windowsgui" -o /go/bin/tiddly-saver.exe
+
+FROM scratch
+COPY --from=build-env /go/bin/tiddly-saver.exe /srv/tiddly-saver.exe
+
+WORKDIR /srv
+ENTRYPOINT [ "./tiddly-saver.exe" ]

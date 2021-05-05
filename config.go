@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 
@@ -60,6 +59,5 @@ func setupLogging() {
 	if err != nil {
 		logrus.Fatalf("Error opening log file: %s", err)
 	}
-	mw := io.MultiWriter(os.Stdout, f)
-	logrus.SetOutput(mw)
+	logrus.SetOutput(f)
 }

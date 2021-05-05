@@ -45,9 +45,9 @@ func watch(cfg Config) {
 				// If it's a write event and the name of the events file matches the file to watch
 				if event.Op&fsnotify.Write == fsnotify.Write && event.Name == cfg.Watch.Path {
 					if timer.Reset(duration) {
-						logrus.Printf("Change to \"%s\" detected, restarting wait period of %d seconds", cfg.Watch.Path, cfg.Wait)
+						logrus.Printf("Change to %s detected, restarting wait period of %d seconds", cfg.Watch.Path, cfg.Wait)
 					} else {
-						logrus.Printf("Change to \"%s\" detected, starting wait period of %d seconds", cfg.Watch.Path, cfg.Wait)
+						logrus.Printf("Change to %s detected, starting wait period of %d seconds", cfg.Watch.Path, cfg.Wait)
 					}
 				}
 			case err, ok := <-watcher.Errors:

@@ -2,16 +2,16 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/getlantern/systray"
+	"github.com/sirupsen/logrus"
 )
 
 func getIcon(path string) []byte {
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatalf("Error opening icon file: %s", err)
+		logrus.Fatalf("Error opening icon file: %s", err)
 	}
 	return b
 }
@@ -36,6 +36,6 @@ func setSystrayMenuItem(title string, tooltip string) {
 }
 
 func onExit() {
-	log.Printf("Exit signal received, stopping program.")
+	logrus.Printf("Exit signal received, stopping program.")
 	os.Exit(0)
 }

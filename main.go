@@ -1,18 +1,20 @@
 package main
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/getlantern/systray"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	setupLogging()
 	cfg := getConfig()
-	log.Printf("Watching for file \"%s\", will move to \"%s\"", cfg.Watch.Path, cfg.Destination.Path)
+	logrus.Printf("Watching for file %s, will move to %s", cfg.Watch.Path, cfg.Destination.Path)
 	go watch(cfg)
 	systray.Run(onReady, onExit)
 }
@@ -26,7 +28,7 @@ func watch(cfg Config) {
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	defer watcher.Close()
 
@@ -43,14 +45,17 @@ func watch(cfg Config) {
 				// If it's a write event and the name of the events file matches the file to watch
 				if event.Op&fsnotify.Write == fsnotify.Write && event.Name == cfg.Watch.Path {
 					// TODO - change message if starting or restarting timer
-					log.Printf("Change to \"%s\" detected, starting wait period of %d seconds", cfg.Watch.Path, cfg.Wait)
-					timer.Reset(duration)
+					if timer.Reset(duration) {
+						logrus.Printf("Change to \"%s\" detected, restarting wait period of %d seconds", cfg.Watch.Path, cfg.Wait)
+					} else {
+						logrus.Printf("Change to \"%s\" detected, starting wait period of %d seconds", cfg.Watch.Path, cfg.Wait)
+					}
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
 					return
 				}
-				log.Println("error:", err)
+				logrus.Println("error:", err)
 			}
 		}
 	}()
@@ -61,17 +66,17 @@ func watch(cfg Config) {
 			<-timer.C
 			timer.Reset(duration)
 			timer.Stop()
-			log.Printf("%d second wait period has passed, moving \"%s\" to \"%s\"", cfg.Wait, cfg.Watch.Path, cfg.Destination.Path)
+			logrus.Printf("%d second wait period has passed, moving \"%s\" to \"%s\"", cfg.Wait, cfg.Watch.Path, cfg.Destination.Path)
 			err := os.Rename(cfg.Watch.Path, cfg.Destination.Path)
 			if err != nil {
-				log.Fatalf("Error moving file: %s", err)
+				logrus.Fatalf("Error moving file: %s", err)
 			}
 		}
 	}()
 
 	err = watcher.Add(filepath.Dir(cfg.Watch.Path))
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	<-done
 }

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
+	"io"
 	"os"
 	"path/filepath"
 
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -24,7 +25,7 @@ func getConfig() Config {
 	// Open config file
 	f, err := os.Open("config.yml")
 	if err != nil {
-		log.Fatalf("Error opening config.yml: %s", err)
+		logrus.Fatalf("Error opening config.yml: %s", err)
 	}
 	defer f.Close()
 
@@ -33,23 +34,32 @@ func getConfig() Config {
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&cfg)
 	if err != nil {
-		log.Fatalf("Error decoding config.yml: %s", err)
+		logrus.Fatalf("Error decoding config.yml: %s", err)
 	}
 
 	// Normalize watch path
 	abs, err := filepath.Abs(cfg.Watch.Path)
 	if err != nil {
-		log.Fatalf("Error getting watch absolute path: %s", err)
+		logrus.Fatalf("Error getting watch absolute path: %s", err)
 	}
 	cfg.Watch.Path = abs
 
 	// Normalize destination path
 	abs, err = filepath.Abs(cfg.Destination.Path)
 	if err != nil {
-		log.Fatalf("Error getting destination absolute path: %s", err)
+		logrus.Fatalf("Error getting destination absolute path: %s", err)
 	}
 	cfg.Destination.Path = abs
 
-	log.Print("Configuration loaded successfully")
+	logrus.Print("Configuration loaded successfully")
 	return cfg
+}
+
+func setupLogging() {
+	f, err := os.OpenFile("tiddly-saver.log", os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		logrus.Fatalf("Error opening log file: %s", err)
+	}
+	mw := io.MultiWriter(os.Stdout, f)
+	logrus.SetOutput(mw)
 }

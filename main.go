@@ -19,7 +19,7 @@ func main() {
 	systray.Run(onReady, onExit)
 }
 
-// watch takes the full path of a file and attempts to watch for that file
+// watch takes the full config to parse and watch / move the file
 func watch(cfg Config) {
 
 	duration := time.Duration(cfg.Wait) * time.Second

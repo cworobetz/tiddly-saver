@@ -1,0 +1,8 @@
+watch:
+  # Location of the file to watch for
+  path: C:/Users/Example User/Downloads/Example User Wiki.html
+destination:
+  # Desired destination of the file
+  path: C:/Users/Example User/Tiddlywiki/Example User Wiki.html
+# Number of seconds after last detected change to move the file. Recommended value: 2
+wait: 2

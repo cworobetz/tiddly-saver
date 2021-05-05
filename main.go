@@ -66,7 +66,7 @@ func watch(cfg Config) {
 			<-timer.C
 			timer.Reset(duration)
 			timer.Stop()
-			logrus.Printf("%d second wait period has passed, moving \"%s\" to \"%s\"", cfg.Wait, cfg.Watch.Path, cfg.Destination.Path)
+			logrus.Printf("%d second wait period has passed, moving %s to %s", cfg.Wait, cfg.Watch.Path, cfg.Destination.Path)
 			err := os.Rename(cfg.Watch.Path, cfg.Destination.Path)
 			if err != nil {
 				logrus.Fatalf("Error moving file: %s", err)

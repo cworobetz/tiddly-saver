@@ -28,7 +28,7 @@ build-tags-windows-amd64:
   - id=$(docker create $CI_REGISTRY_IMAGE:build)
   - docker cp $id:/srv/${WINDOWS_BINARY} ./${WINDOWS_BINARY}
   - apk add zip
-  - zip ${WINDOWS_ZIP} assets/ config.yml.example ${WINDOWS_BINARY}
+  - zip -r ${WINDOWS_ZIP} assets/ config.yml.example ${WINDOWS_BINARY}
   artifacts:
     paths:
     - ./${WINDOWS_ZIP}

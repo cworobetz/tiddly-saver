@@ -25,7 +25,7 @@ build-tags-windows-amd64:
   script:
   - docker build -t $CI_REGISTRY_IMAGE:build -f Dockerfile.windows .
   - id=$(docker create $CI_REGISTRY_IMAGE:build)
-  - docker cp $id:/go/bin/${WINDOWS_BINARY} ./${WINDOWS_BINARY}
+  - docker cp $id:/srv/${WINDOWS_BINARY} ./${WINDOWS_BINARY}
   - mkdir tiddly-saver-windows
   - cp -r assets/ ${WINDOWS_BINARY} config.yml.example tiddly-saver-windows
   - apk add zip

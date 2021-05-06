@@ -7,6 +7,7 @@ variables:
   CI_APPLICATION_TAG: $CI_COMMIT_TAG
   DOCKER_TLS_CERTDIR: "/certs"
   WINDOWS_BINARY: "tiddly-saver.exe"
+  WINDOWS_ZIP: "tiddly-saver-windows.zip"
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/tiddly-saver/${CI_COMMIT_TAG}"
 
 stages:
@@ -26,13 +27,11 @@ build-tags-windows-amd64:
   - docker build -t $CI_REGISTRY_IMAGE:build -f Dockerfile.windows .
   - id=$(docker create $CI_REGISTRY_IMAGE:build)
   - docker cp $id:/srv/${WINDOWS_BINARY} ./${WINDOWS_BINARY}
-  - mkdir tiddly-saver-windows
-  - cp -r assets/ ${WINDOWS_BINARY} config.yml.example tiddly-saver-windows
   - apk add zip
-  - zip tiddly-saver-windows.zip assets/ config.yml.example ${WINDOWS_BINARY}
+  - zip ${WINDOWS_ZIP} assets/ config.yml.example ${WINDOWS_BINARY}
   artifacts:
     paths:
-    - ./tiddly-saver-windows.zip
+    - ./${WINDOWS_ZIP}
 
 upload-tags-windows-amd64:
   stage: upload
@@ -41,7 +40,7 @@ upload-tags-windows-amd64:
   - tags
   script:
   - |
-    curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file ./tiddly-saver-windows.zip ${PACKAGE_REGISTRY_URL}/tiddly-saver-windows.zip
+    curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file ./${WINDOWS_ZIP} ${PACKAGE_REGISTRY_URL}/${WINDOWS_ZIP}
 
 release-tags:
   stage: release
@@ -51,4 +50,4 @@ release-tags:
   script:
   - |
     release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-      --assets-link "{\"name\":\"tiddly-saver-windows.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}/tiddly-saver-windows.zip\"}"
+      --assets-link "{\"name\":\"${WINDOWS_ZIP}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_ZIP}\"}"

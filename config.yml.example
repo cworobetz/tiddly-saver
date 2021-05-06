@@ -1,6 +1,6 @@
 watch:
   # Location of the file to watch for
-  path: C:/Users/Cooper worobetz/Downloads/Coopers Wiki.html
+  path: C:/Users/Example User/Downloads/Coopers Wiki.html
 destination:
   # Desired destination of the file
   path: C:/Users/Example User/Tiddlywiki/Example User Wiki.html
